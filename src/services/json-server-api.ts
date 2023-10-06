@@ -3,7 +3,7 @@ import { Post, PostCreate } from "../types/post.type";
 
 export const jsonServerApi = createApi({
   reducerPath: "jsonServerApi",
-  baseQuery: fetchBaseQuery({ baseUrl: "/api/" }),
+  baseQuery: fetchBaseQuery({ baseUrl: "https://redux-crud-api.vercel.app/api/" }),
   tagTypes: ["Post"],
   endpoints: (builder) => ({
     getPosts: builder.query({
