@@ -19,33 +19,35 @@ const PostPage = (props: Props) => {
     const { data: posts, isLoading, isSuccess, refetch } = useGetPostsQuery(null, {
 
     });
-    const [createPost, { isLoading : isLoadingCreate }] = useCreatePostMutation();
-    const [updatePost, { isLoading : isLoadingUpdate }] = useUpdatePostMutation();
-    const [deletePost, { isLoading : isLoadingDelete }] = useDeletePostMutation();
+    const [createPost, { isLoading: isLoadingCreate }] = useCreatePostMutation();
+    const [updatePost, { isLoading: isLoadingUpdate }] = useUpdatePostMutation();
+    const [deletePost, { isLoading: isLoadingDelete }] = useDeletePostMutation();
 
     const onSubmit = (result: { data: any, isUpdate: boolean }) => {
-        const {data , isUpdate} = result;
+        const { data, isUpdate } = result;
         if (isUpdate) {
             updatePost(data).then(() => {
                 refetch();
+                handleClose();
             });
-        }else {
+        } else {
             createPost(data).then(() => {
                 refetch();
+                handleClose();
             });
         }
-        handleClose();
     }
 
     const handleDelete = (id: number) => {
-        deletePost(id);
-        handleCloseDelete();
-        refetch();
+        deletePost(id).then(() => {
+            refetch();
+            handleCloseDelete();
+        });
     }
 
-    const prepareForm = (value?: any) => {
+    const prepareForm = (isLoaging: boolean, value?: any) => {
         handleOpen();
-        setForm(<PostForm emitData={onSubmit} defaultValues={value} />);
+        setForm(<PostForm isLoading={isLoading} emitData={onSubmit} defaultValues={value} />);
     }
 
     const handleOpen = () => {
@@ -56,7 +58,7 @@ const PostPage = (props: Props) => {
         setOpen(false)
     }
 
-    const handleOpenDelete = (id :number) => {
+    const handleOpenDelete = (id: number) => {
         setIdToDelete(id);
         setOpenDelete(true)
     }
@@ -72,18 +74,16 @@ const PostPage = (props: Props) => {
                     <Typography component={'h2'}>
                         Redux Crud
                     </Typography>
+                    <Button color='neutral' onClick={() => prepareForm(isLoadingCreate)} startDecorator={<Add />}>New Post</Button>
                 </Box>
                 <Box display={'flex'} flexDirection={'column'} pt={5} >
-                    <Box alignSelf={'flex-end'} sx={{ px: '5%' }}>
-                        <Button color='neutral' onClick={() => prepareForm()} startDecorator={<Add />}>New Post</Button>
-                    </Box>
                     <Box sx={{ overflowY: 'auto', mx: '5%', mt: 5 }}>
                         {
                             isLoading ? <Box width={'100%'} display={'flex'} justifyContent={'center'} alignItems={'center'}></Box> :
                                 (
                                     isSuccess ?
-                                        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', transition : 'all 0.6 ease' }}>
-                                            {posts.map((post: Post) => <PostItem emitEdit={(id: number) => prepareForm(post)} emitDelete={(id: number) => handleOpenDelete(id)} post={post} />)}
+                                        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', transition: 'all 0.6 ease' }}>
+                                            {posts.map((post: Post) => <PostItem emitEdit={(id: number) => prepareForm(isLoadingUpdate, post)} emitDelete={(id: number) => handleOpenDelete(id)} post={post} />)}
                                         </Box>
                                         :
                                         <Box width={'100%'} display={'flex'} justifyContent={'center'} alignItems={'center'}>
@@ -136,7 +136,7 @@ const PostPage = (props: Props) => {
                         Are you sure you want to discard this post?
                     </DialogContent>
                     <DialogActions>
-                        <Button variant="solid" color="danger" onClick={() => handleDelete(idToDelete!)}>
+                        <Button loading={isLoadingDelete} variant="solid" color="danger" onClick={() => handleDelete(idToDelete!)}>
                             Discard post
                         </Button>
                         <Button variant="plain" color="neutral" onClick={handleCloseDelete}>

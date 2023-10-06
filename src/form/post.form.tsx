@@ -2,11 +2,13 @@ import { Button, FormControl, FormLabel, Stack, Input, FormHelperText, Typograph
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from 'react-hook-form';
 import { object, string } from 'yup';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 type Props = {
     defaultValues?: FormType,
-    emitData: any
+    emitData: any,
+    isLoading : boolean
+
 }
 
 const formSchema = object({
@@ -19,7 +21,7 @@ type FormType = {
     author: string
 };
 
-const PostForm = ({ emitData, defaultValues }: Props) => {
+const PostForm = ({ emitData, defaultValues, isLoading }: Props) => {
     const { handleSubmit, formState: { errors }, register, reset } = useForm({
         resolver: yupResolver(formSchema),
         defaultValues: defaultValues ? defaultValues : {},
@@ -27,8 +29,11 @@ const PostForm = ({ emitData, defaultValues }: Props) => {
     });
     const [loading, setLoading] = React.useState<boolean>(false)
 
+    useEffect(()=> {
+        setLoading(isLoading);
+    }, [isLoading])
+    
     const onSubmit = (data: FormType) => {
-        setLoading(true)
         if (defaultValues) {
             emitData({ data: data, isUpdate: true })
             return
